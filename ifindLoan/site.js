@@ -42,6 +42,27 @@
     window.addEventListener("scroll", onScroll, { passive: true });
   }
 
+  /* ---- soft scroll for same-page hash buttons/links (mobile + desktop) ---- */
+  var prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.addEventListener("click", function (e) {
+    var link = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!link) return;
+    var href = link.getAttribute("href");
+    if (!href || href === "#") return;
+    var id = decodeURIComponent(href.slice(1));
+    if (!id) return;
+    var target = document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    target.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "start"
+    });
+    if (history.pushState) {
+      try { history.pushState(null, "", href); } catch (err) { /* ignore */ }
+    }
+  });
+
   /* ---- decorative SVGs: hide from AT when not already labeled ---- */
   document.querySelectorAll("svg").forEach(function (svg) {
     if (svg.hasAttribute("aria-hidden") || svg.hasAttribute("aria-label") || svg.getAttribute("role") === "img") {

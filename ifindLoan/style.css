@@ -127,7 +127,10 @@ html {
 
 /* click-to-scroll targets clear the sticky header (smooth scroll comes from scroll-behavior above) */
 :target,
-section[id] {
+section[id],
+#form,
+#loan-funnel,
+#how {
   scroll-margin-top: 84px;
 }
 
@@ -4159,11 +4162,6 @@ body.nav-open {
   #loan-funnel {
     min-height: 0;
   }
-}
-
-/* While funnel is active, avoid smooth-scrolling amplifying residual layout nudges */
-html:has(#loan-funnel.is-ready) {
-  scroll-behavior: auto;
 }
 
 #loan-funnel > *:not(.form-skeleton) {
