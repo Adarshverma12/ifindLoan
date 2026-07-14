@@ -1,0 +1,12 @@
+{
+  "name": "ifindloan",
+  "version": "1.0.0",
+  "description": "Premium, lightweight, conversion-focused affiliate landing site for **ifindloan.com**. SoFi / LendingTree-style light-green layout, split hero (copy left / loan funnel right), and the full compliance footer. Pure HTML5 + CSS3 + vanilla JS — no frameworks, no build step.",
+  "main": "site.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

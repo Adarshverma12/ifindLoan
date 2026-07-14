@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Utility / opt-out pages are intentionally kept out of search
+Disallow: /unsubscribe/
+Disallow: /do-not-sell-my-info/
+
+Sitemap: https://ifindloan.com/sitemap.xml
