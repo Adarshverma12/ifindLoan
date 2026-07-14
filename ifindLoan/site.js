@@ -115,12 +115,12 @@
     if (formCard && formCard !== hero) so.observe(formCard);
   }
 
-  /* ---- EPC funnel: skeleton ready + grow-only mount lock + shadow floor ---- */
+  /* ---- EPC funnel: skeleton ready + content-hugging height + ring clearance ---- */
   var funnel = document.getElementById("loan-funnel");
   if (funnel) {
-    var lockedH = 0;
-    var lockRaf = 0;
-    var shadowStyled = false;
+    var syncedH = 0;
+    var syncRaf = 0;
+    var syncing = false;
 
     var markReady = function () {
       var kids = funnel.children;
@@ -139,8 +139,9 @@
       }
     };
 
-    /* Open-shadow floor only — never hide APR / disclaimer / legal copy. */
-    var injectShadowFloor = function (host) {
+    /* Shadow styles: ring clearance only. No min-height floors (those caused
+       empty space on mobile start and after Back). Never hide APR/legal copy. */
+    var injectShadowStyles = function (host) {
       if (!host || !host.shadowRoot) return false;
       var root = host.shadowRoot;
       var style = root.getElementById("ifind-stable-floor");
@@ -149,79 +150,65 @@
         style.id = "ifind-stable-floor";
         root.appendChild(style);
       }
-      /* Mobile keeps tall floors (stable fill). Desktop: no forced min-height.
-         Extra padding-top clears the 4% progress ring from the heading;
-         padding-bottom reduced so outer card height does not grow. */
       style.textContent =
-        ":host{display:block!important;box-sizing:border-box!important}" +
-        "#epc-root{box-sizing:border-box!important}" +
-        "section[data-step]{box-sizing:border-box!important;" +
+        ":host{display:block!important;box-sizing:border-box!important;min-height:0!important}" +
+        "#epc-root,#epc-root > .flex{box-sizing:border-box!important;min-height:0!important}" +
+        "section[data-step]{box-sizing:border-box!important;min-height:0!important;" +
         "padding-top:5.75rem!important;padding-bottom:0.25rem!important}" +
-        /* Nudge progress ring slightly into the card header seam */
-        "section[data-step] > div.absolute[class*=\"-top-\"]{" +
-        "top:-3.75rem!important}" +
-        "@media (min-width:641px){" +
-        ":host,#epc-root,#epc-root > .flex,section[data-step]{min-height:0!important}" +
-        "}" +
+        "section[data-step] > div.absolute[class*=\"-top-\"]{top:-3.75rem!important}" +
         "@media (max-width:640px){" +
-        ":host{min-height:760px!important}" +
-        "#epc-root{min-height:760px!important}" +
-        "#epc-root > .flex{min-height:760px!important;align-items:stretch!important}" +
-        "section[data-step]{min-height:720px!important;padding-top:5.5rem!important;padding-bottom:0.5rem!important}" +
+        "section[data-step]{padding-top:5.5rem!important;padding-bottom:0.35rem!important}" +
         "}";
-      shadowStyled = true;
       return true;
     };
 
-    /* Ratchet #loan-funnel min-height UP only — no scrollTo (avoids page nudges). */
-    var primed = false;
-    var applyHeightLock = function () {
+    /* Hug current step height (up AND down) so Back never leaves a hollow gap.
+       No scrollTo — avoids page nudges. */
+    var syncMountHeight = function () {
       var host = funnel.querySelector("epc-funnel, .EPC-FUNNEL");
-      if (host) injectShadowFloor(host);
+      if (host) injectShadowStyles(host);
 
-      var mountH = Math.ceil(funnel.getBoundingClientRect().height);
+      syncing = true;
+      funnel.style.minHeight = "0px";
       var hostH = host ? Math.ceil(host.getBoundingClientRect().height) : 0;
-      var h = Math.max(mountH, hostH);
-
-      /* Mobile: tall prime. Desktop: lock to measured height only (no +buffer empty gap). */
-      if (!primed && funnel.classList.contains("is-ready") && h > 280) {
-        primed = true;
-        var mobile = window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
-        if (mobile) h = Math.max(h, 980);
+      var h = Math.max(Math.ceil(funnel.getBoundingClientRect().height), hostH);
+      if (h < 120) {
+        syncing = false;
+        return;
       }
-
-      if (!(h > lockedH + 1)) return;
-
-      lockedH = h;
-      funnel.style.minHeight = lockedH + "px";
+      if (Math.abs(h - syncedH) > 1) syncedH = h;
+      funnel.style.minHeight = syncedH + "px";
+      requestAnimationFrame(function () { syncing = false; });
     };
 
-    var scheduleLock = function () {
-      if (lockRaf) cancelAnimationFrame(lockRaf);
-      lockRaf = requestAnimationFrame(function () {
-        lockRaf = 0;
+    var scheduleSync = function () {
+      if (syncing) return;
+      if (syncRaf) cancelAnimationFrame(syncRaf);
+      syncRaf = requestAnimationFrame(function () {
+        syncRaf = 0;
         markReady();
-        applyHeightLock();
+        syncMountHeight();
       });
     };
 
     markReady();
-    scheduleLock();
+    scheduleSync();
 
     if ("MutationObserver" in window) {
-      var mo = new MutationObserver(function () { scheduleLock(); });
+      var mo = new MutationObserver(function () { scheduleSync(); });
       mo.observe(funnel, { childList: true, subtree: true, attributes: true });
-      /* Keep observing for the full session — do not disconnect after 20s */
     }
 
     if ("ResizeObserver" in window) {
-      var ro = new ResizeObserver(function () { scheduleLock(); });
+      var ro = new ResizeObserver(function () {
+        if (!syncing) scheduleSync();
+      });
       ro.observe(funnel);
       var watchHost = function () {
         var host = funnel.querySelector("epc-funnel, .EPC-FUNNEL");
         if (host) {
           try { ro.observe(host); } catch (e) { /* ignore */ }
-          injectShadowFloor(host);
+          injectShadowStyles(host);
           return true;
         }
         return false;
@@ -234,9 +221,9 @@
       }
     }
 
-    funnel.addEventListener("click", scheduleLock, true);
-    funnel.addEventListener("input", scheduleLock, true);
-    funnel.addEventListener("change", scheduleLock, true);
+    funnel.addEventListener("click", scheduleSync, true);
+    funnel.addEventListener("input", scheduleSync, true);
+    funnel.addEventListener("change", scheduleSync, true);
   }
 
   /* ---- amount picker chips ---- */
