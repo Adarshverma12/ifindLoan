@@ -42,8 +42,49 @@
     window.addEventListener("scroll", onScroll, { passive: true });
   }
 
-  /* ---- soft scroll for same-page hash buttons/links (mobile + desktop) ---- */
+  /* ---- soft scroll for same-page hash buttons/links ----
+     Mobile: slower custom ease (~1.5s). Desktop: native smooth. */
   var prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var mobileScrollMq = window.matchMedia ? window.matchMedia("(max-width: 860px)") : null;
+  var mobileScrollRaf = 0;
+
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function isMobileViewport() {
+    return !!(mobileScrollMq && mobileScrollMq.matches);
+  }
+
+  function slowScrollTo(target) {
+    var headerEl = document.querySelector(".site-header");
+    var offset = headerEl ? Math.ceil(headerEl.getBoundingClientRect().height) + 8 : 72;
+    var end = Math.max(0, Math.round((window.pageYOffset || window.scrollY || 0) + target.getBoundingClientRect().top - offset));
+    var start = window.pageYOffset || window.scrollY || 0;
+    var dist = end - start;
+    if (Math.abs(dist) < 2) return;
+    var duration = 1500;
+    var t0 = null;
+    if (mobileScrollRaf) cancelAnimationFrame(mobileScrollRaf);
+    /* Force instant programmatic steps so CSS smooth does not accelerate them */
+    var root = document.documentElement;
+    var prevBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    function step(now) {
+      if (t0 == null) t0 = now;
+      var p = Math.min(1, (now - t0) / duration);
+      var y = start + dist * easeInOutCubic(p);
+      window.scrollTo(0, y);
+      if (p < 1) {
+        mobileScrollRaf = requestAnimationFrame(step);
+      } else {
+        mobileScrollRaf = 0;
+        root.style.scrollBehavior = prevBehavior;
+      }
+    }
+    mobileScrollRaf = requestAnimationFrame(step);
+  }
+
   document.addEventListener("click", function (e) {
     var link = e.target.closest ? e.target.closest('a[href^="#"]') : null;
     if (!link) return;
@@ -54,14 +95,18 @@
     var target = document.getElementById(id);
     if (!target) return;
     e.preventDefault();
-    target.scrollIntoView({
-      behavior: prefersReducedMotion ? "auto" : "smooth",
-      block: "start"
-    });
+    e.stopPropagation();
+    if (prefersReducedMotion) {
+      target.scrollIntoView({ behavior: "auto", block: "start" });
+    } else if (isMobileViewport()) {
+      slowScrollTo(target);
+    } else {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
     if (history.pushState) {
       try { history.pushState(null, "", href); } catch (err) { /* ignore */ }
     }
-  });
+  }, true);
 
   /* ---- decorative SVGs: hide from AT when not already labeled ---- */
   document.querySelectorAll("svg").forEach(function (svg) {
