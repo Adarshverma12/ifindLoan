@@ -292,82 +292,6 @@
     funnel.addEventListener("change", scheduleSync, true);
   }
 
-  /* ---- amount picker chips ---- */
-  var chips = document.querySelectorAll(".chip[data-amt]");
-  var pickedOut = document.getElementById("pickedAmount");
-  chips.forEach(function (c) {
-    c.addEventListener("click", function () {
-      chips.forEach(function (x) { x.classList.remove("is-active"); x.setAttribute("aria-pressed", "false"); });
-      c.classList.add("is-active"); c.setAttribute("aria-pressed", "true");
-      if (pickedOut) { pickedOut.textContent = c.getAttribute("data-amt"); }
-      var amtRange = document.getElementById("cAmount");
-      if (amtRange) {
-        var v = parseInt(c.getAttribute("data-amt").replace(/[^0-9]/g, ""), 10);
-        if (!isNaN(v)) { amtRange.value = Math.min(v, parseInt(amtRange.max, 10)); calc(); }
-      }
-    });
-  });
-
-  /* ---- loan payment calculator ---- */
-  var amount = document.getElementById("cAmount");
-  var apr = document.getElementById("cApr");
-  var term = document.getElementById("cTerm");
-  function money(n) { return "$" + Math.round(n).toLocaleString("en-US"); }
-
-  function calc() {
-    if (!amount || !apr || !term) return;
-    var P = +amount.value, r = (+apr.value) / 100 / 12, n = +term.value;
-    var m = r === 0 ? P / n : (P * r) / (1 - Math.pow(1 + r, -n));
-    var total = m * n, interest = Math.max(0, total - P);
-
-    setText("cAmountOut", money(P));
-    setText("cAprOut", (+apr.value).toFixed(1) + "%");
-    setText("cTermOut", n + " mo");
-    setText("payOut", money(m));
-    setText("totalOut", money(total));
-    setText("principalOut", money(P));
-    setText("interestOut", money(interest));
-
-    var circ = 2 * Math.PI * 48;
-    var pShare = total > 0 ? P / total : 1;
-    var iShare = total > 0 ? interest / total : 0;
-    var pLen = circ * pShare;
-    var iLen = circ * iShare;
-    var ringP = document.getElementById("ringPrincipal");
-    var ringI = document.getElementById("ringInterest");
-    if (ringP) ringP.style.strokeDasharray = pLen.toFixed(2) + " " + circ.toFixed(2);
-    if (ringI) {
-      ringI.style.strokeDasharray = iLen.toFixed(2) + " " + circ.toFixed(2);
-      ringI.style.strokeDashoffset = (-pLen).toFixed(2);
-    }
-    setText("interestPct", Math.round(iShare * 100) + "%");
-
-    var bars = document.getElementById("bars");
-    if (!bars) return;
-    var years = Math.max(1, Math.ceil(n / 12));
-    var bal = P, rows = [];
-    for (var y = 0; y < years; y++) {
-      var yP = 0, yI = 0;
-      for (var mo = 0; mo < 12 && (y * 12 + mo) < n; mo++) {
-        var iPart = bal * r, pPart = m - iPart;
-        yI += iPart; yP += pPart; bal -= pPart;
-      }
-      rows.push({ p: yP, i: yI });
-    }
-    var max = rows.reduce(function (a, x) { return Math.max(a, x.p + x.i); }, 1);
-    bars.innerHTML = rows.map(function (row, idx) {
-      var hp = (row.p / max) * 100, hi = (row.i / max) * 100;
-      return '<div class="bar"><div class="stack" style="height:' + (hp + hi) + '%">' +
-        '<div class="sp" style="height:' + (hp / (hp + hi) * 100 || 0) + '%"></div>' +
-        '<div class="si" style="height:' + (hi / (hp + hi) * 100 || 0) + '%"></div>' +
-        '</div><span>Y' + (idx + 1) + '</span></div>';
-    }).join("");
-  }
-  function setText(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
-
-  [amount, apr, term].forEach(function (el) { if (el) el.addEventListener("input", calc); });
-  if (amount) calc();
-
   /* ---- mailto / simple forms: validation UX ---- */
   document.querySelectorAll("form.simple-form").forEach(function (form) {
     var status = form.querySelector(".form-status");
@@ -415,44 +339,6 @@
       if (href && href === path) a.setAttribute("aria-current", "page");
     });
   } catch (err) { /* ignore */ }
-
-  /* ---- hero stats counter ---- */
-  var stats = document.querySelectorAll(".hero-stat b[data-count]");
-  if (stats.length) {
-    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var formatCount = function (el, val) {
-      var prefix = el.getAttribute("data-prefix") || "";
-      var suffix = el.getAttribute("data-suffix") || "";
-      var decimals = parseInt(el.getAttribute("data-decimals") || "0", 10);
-      el.textContent = prefix + (decimals ? val.toFixed(decimals) : Math.round(val)) + suffix;
-    };
-    var animateCount = function (el) {
-      var target = parseFloat(el.getAttribute("data-count"));
-      if (isNaN(target)) return;
-      if (reduceMotion) { formatCount(el, target); return; }
-      var duration = 1100;
-      var start = performance.now();
-      var tick = function (now) {
-        var t = Math.min(1, (now - start) / duration);
-        var eased = 1 - Math.pow(1 - t, 3);
-        formatCount(el, target * eased);
-        if (t < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    };
-    if ("IntersectionObserver" in window) {
-      var sio = new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) {
-          if (!en.isIntersecting) return;
-          animateCount(en.target);
-          sio.unobserve(en.target);
-        });
-      }, { threshold: 0.4 });
-      stats.forEach(function (el) { sio.observe(el); });
-    } else {
-      stats.forEach(animateCount);
-    }
-  }
 
   /* ---- copyright year ---- */
   var yr = document.getElementById("yr");

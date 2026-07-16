@@ -116,48 +116,14 @@
 
   <main id="main">
   <!-- ============ HERO: copy left / form right ============ -->
-  <section class="hero" id="form">
+  <section class="hero hero--simple" id="form">
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="wrap hero-inner">
       <div class="hero-copy">
-        <span class="hero-badge">Personal loans · $100–$5,000</span>
-        <h1>Find Your Best <span>Personal Loan</span></h1>
-        <p class="hero-sub">Compare trusted lenders and receive personalized loan offers in as little as 2 minutes — free, with no obligation.</p>
-
-        <ul class="hero-trust" aria-label="Trust signals">
-          <li>
-            <span class="hero-trust__stars" aria-hidden="true">★★★★★</span>
-            <span><strong>4.9</strong> Rating</span>
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            <span><strong>150,000+</strong> Customers</span>
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
-            <span><strong>SSL</strong> Secured</span>
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
-            <span><strong>No</strong> Hidden Fees</span>
-          </li>
-        </ul>
-
-        <div class="hero-stats" aria-label="Platform highlights">
-          <div class="hero-stat">
-            <b data-count="150" data-suffix="K+">0K+</b>
-            <span>Loans matched</span>
-          </div>
-          <div class="hero-stat">
-            <b data-count="120" data-prefix="$" data-suffix="M+">$0M+</b>
-            <span>Funding facilitated</span>
-          </div>
-          <div class="hero-stat">
-            <b data-count="4.9" data-decimals="1" data-suffix="★">0★</b>
-            <span>Customer rating</span>
-          </div>
-        </div>
-
+        <p class="hero-brand">iFindLoan</p>
+        <h1>Find your best <span>personal loan</span></h1>
+        <p class="hero-sub">Compare lenders and get personalized offers in minutes — free, no obligation.</p>
+        <p class="hero-meta">$100–$5,000 · SSL secured · About 2 minutes</p>
         <div class="hero-cta-row">
           <a class="btn btn-primary btn-hero" href="#loan-funnel">See My Options — Free</a>
           <a class="hero-link" href="#how">See how it works
@@ -281,94 +247,7 @@
     </div>
   </section>
 
-  <!-- ============ LOAN PAYMENT CALCULATOR ============ -->
-  <section class="section section--paper" id="calculator">
-    <div class="wrap">
-      <div class="center">
-        <span class="kick rv">See it in numbers</span>
-        <h2 class="rv">Try the loan payment calculator</h2>
-        <p class="lead rv">Estimate a monthly payment before you request anything. This is illustrative only &mdash; your actual rate, term, and payment are set by the lender you choose.</p>
-      </div>
-
-      <div class="amount-picker rv">
-        <span>Quick-start an amount</span>
-        <div class="chips" role="group" aria-label="Quick-pick a loan amount">
-          <button type="button" class="chip" data-amt="$500" aria-pressed="false">$500</button>
-          <button type="button" class="chip is-active" data-amt="$2,000" aria-pressed="true">$2,000</button>
-          <button type="button" class="chip" data-amt="$3,500" aria-pressed="false">$3,500</button>
-          <button type="button" class="chip" data-amt="$5,000" aria-pressed="false">$5,000</button>
-        </div>
-      </div>
-
-      <div class="calc rv">
-        <div class="calc-controls">
-          <div class="field">
-            <label for="cAmount">Loan amount <b id="cAmountOut">$2,000</b></label>
-            <input type="range" id="cAmount" min="100" max="5000" step="50" value="2000" aria-describedby="pickedAmount">
-            <div class="hintrow"><span>$100</span><span>$5,000</span></div>
-          </div>
-          <div class="field">
-            <label for="cApr">Estimated APR <b id="cAprOut">24.0%</b></label>
-            <input type="range" id="cApr" min="5.99" max="35.99" step="0.1" value="24">
-            <div class="hintrow"><span>5.99%</span><span>35.99%</span></div>
-          </div>
-          <div class="field">
-            <label for="cTerm">Term <b id="cTermOut">12 mo</b></label>
-            <input type="range" id="cTerm" min="3" max="60" step="1" value="12">
-            <div class="hintrow"><span>3 mo</span><span>60 mo</span></div>
-          </div>
-          <span id="pickedAmount" class="sr-only">$2,000</span>
-        </div>
-
-        <div class="calc-panel">
-          <div class="calc-panel__glow" aria-hidden="true"></div>
-          <div class="calc-panel__head">
-            <span class="pay-label">Estimated monthly payment</span>
-            <div class="pay"><span id="payOut">$189</span><small>/mo</small></div>
-          </div>
-
-          <div class="calc-metrics">
-            <div class="calc-metric">
-              <span class="calc-metric__k"><i class="dot p" aria-hidden="true"></i>Principal</span>
-              <b id="principalOut">$2,000</b>
-            </div>
-            <div class="calc-metric">
-              <span class="calc-metric__k"><i class="dot i" aria-hidden="true"></i>Interest</span>
-              <b id="interestOut">$268</b>
-            </div>
-            <div class="calc-metric calc-metric--total">
-              <span class="calc-metric__k">Total to repay</span>
-              <b id="totalOut">$2,268</b>
-            </div>
-          </div>
-
-          <div class="calc-viz">
-            <div class="calc-ring" aria-hidden="true">
-              <svg viewBox="0 0 120 120" width="120" height="120">
-                <circle class="ring-track" cx="60" cy="60" r="48" fill="none" stroke-width="12"></circle>
-                <circle class="ring-interest" id="ringInterest" cx="60" cy="60" r="48" fill="none" stroke-width="12"
-                  stroke-linecap="round" transform="rotate(-90 60 60)"></circle>
-                <circle class="ring-principal" id="ringPrincipal" cx="60" cy="60" r="48" fill="none" stroke-width="12"
-                  stroke-linecap="round" transform="rotate(-90 60 60)"></circle>
-              </svg>
-              <div class="calc-ring__center">
-                <span id="interestPct">12%</span>
-                <small>interest share</small>
-              </div>
-            </div>
-            <div class="calc-bars-wrap">
-              <span class="calc-bars-label">Yearly breakdown</span>
-              <div class="bars" id="bars" role="img" aria-label="Yearly principal versus interest breakdown"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <p class="calc-note">Estimate only, not an offer of credit. iFindLoan is not a lender and does not set rates, terms, or fees &mdash; the lender you're matched with discloses the real numbers before you agree to anything.</p>
-      <p class="center rv" style="margin-top:1.2rem"><a class="btn btn-primary" href="#form">Get My Real Offers</a></p>
-    </div>
-  </section>
-
-  <!-- ============ FEATURE: clarity / peace-of-mind (replaces calculator) ============ -->
+  <!-- ============ FEATURE: clarity / peace-of-mind ============ -->
   <section class="section feat" id="calm-borrowing">
     <div class="wrap">
       <div class="feat-grid">
