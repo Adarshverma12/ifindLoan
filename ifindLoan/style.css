@@ -5107,34 +5107,39 @@ body {
 
   .hero--fintech .hero-art {
     top: auto;
-    height: 320px;
+    bottom: 0;
+    height: 380px;
   }
 
   .hero--fintech .hero-art img,
   .hero--fintech .hero-art svg {
-    width: 155%;
-    min-height: 320px;
-    height: 100%;
+    width: 150%;
+    min-height: 115%;
+    height: 115%;
     left: 50%;
-    transform: translateX(-50%);
+    bottom: 0;
+    transform: translate(-50%, -18%);
     object-fit: cover;
-    object-position: 45% 70%;
+    object-position: 42% 58%;
     opacity: 1;
   }
 
+  /* Keep copy/CTA readable when scene sits higher */
   .hero--fintech .hero-art::after {
     background: linear-gradient(
       180deg,
-      rgba(248, 251, 255, .85) 0%,
-      rgba(248, 251, 255, .2) 45%,
-      rgba(248, 251, 255, 0) 100%
+      rgba(248, 251, 255, .97) 0%,
+      rgba(248, 251, 255, .9) 28%,
+      rgba(248, 251, 255, .55) 52%,
+      rgba(248, 251, 255, .12) 72%,
+      rgba(248, 251, 255, 0) 88%
     );
   }
 
   .hero--fintech .hero-inner {
     grid-template-columns: 1fr;
     gap: 28px;
-    padding: 24px 0 280px;
+    padding: 24px 0 200px;
     min-height: 0;
     align-items: stretch;
   }
@@ -5191,18 +5196,31 @@ body {
 
 @media (max-width: 640px) {
   .hero--fintech .hero-art {
-    height: 260px;
+    height: 300px;
   }
 
   .hero--fintech .hero-art img,
   .hero--fintech .hero-art svg {
-    width: 180%;
-    min-height: 260px;
-    object-position: 42% 75%;
+    width: 175%;
+    min-height: 118%;
+    height: 118%;
+    transform: translate(-50%, -22%);
+    object-position: 40% 55%;
+  }
+
+  .hero--fintech .hero-art::after {
+    background: linear-gradient(
+      180deg,
+      rgba(248, 251, 255, .98) 0%,
+      rgba(248, 251, 255, .92) 32%,
+      rgba(248, 251, 255, .58) 54%,
+      rgba(248, 251, 255, .15) 74%,
+      rgba(248, 251, 255, 0) 90%
+    );
   }
 
   .hero--fintech .hero-inner {
-    padding-bottom: 240px;
+    padding-bottom: 168px;
   }
 
   .hero--fintech .hero-checks {
