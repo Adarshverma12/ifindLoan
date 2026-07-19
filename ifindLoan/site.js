@@ -251,8 +251,15 @@
       return true;
     };
 
-    /* Hug host height without collapsing to 0 (that flash caused hero CLS).
-       CSS already reserves ~720px; JS only nudges after the funnel is real. */
+    /* Hug host height without collapsing below CSS floor (inline minHeight
+       used to override the 720px reserve and cause preload→postload jump). */
+    var cssFloor = function () {
+      var w = window.innerWidth || 1200;
+      if (w <= 640) return 660;
+      if (w <= 1000) return 680;
+      return 720;
+    };
+
     var syncMountHeight = function () {
       var host = funnel.querySelector("epc-funnel, .EPC-FUNNEL");
       if (host) injectShadowStyles(host);
@@ -267,13 +274,14 @@
         syncing = false;
         return;
       }
+      var next = Math.max(hostH, cssFloor());
       /* Ignore tiny thrash; keep layout calm during hydrate */
-      if (Math.abs(hostH - syncedH) < 8 && syncedH > 0) {
+      if (Math.abs(next - syncedH) < 8 && syncedH > 0) {
         syncing = false;
         return;
       }
-      syncedH = hostH;
-      funnel.style.minHeight = syncedH + "px";
+      syncedH = next;
+      funnel.style.minHeight = next + "px";
       requestAnimationFrame(function () { syncing = false; });
     };
 
@@ -509,6 +517,22 @@
       lastFocus = null;
     }
 
+    function isFileProtocol() {
+      return location.protocol === "file:";
+    }
+
+    /* Bundled prose HTML (modal-pages-data.js) — works when fetch/iframe are blocked on file:// */
+    function fromBundledHtml(file) {
+      var bag = typeof window !== "undefined" ? window.IFIND_MODAL_HTML : null;
+      if (!bag || !bag[file]) return null;
+      var parsed = {
+        title: MODAL_PAGES[file] || "Details",
+        html: bag[file]
+      };
+      cache[file] = parsed;
+      return parsed;
+    }
+
     function parsePageHtml(html, file) {
       var doc = new DOMParser().parseFromString(html, "text/html");
       var prose = doc.querySelector(".prose.wide") || doc.querySelector(".prose") || doc.querySelector("main #main .section .wrap") || doc.querySelector("main");
@@ -534,6 +558,16 @@
         }
       }
 
+      /* file:// blocks fetch + opaque iframes — use bundled content (same clean modal as localhost) */
+      if (isFileProtocol()) {
+        var bundled = fromBundledHtml(file);
+        if (bundled) return Promise.resolve(bundled);
+        return Promise.resolve({
+          title: MODAL_PAGES[file] || "Details",
+          html: "<p>This page could not be loaded offline. Keep <code>modal-pages-data.js</code> next to <code>index.html</code>, or open via <strong>start-preview.bat</strong>.</p>"
+        });
+      }
+
       return fetch(file, { credentials: "same-origin" })
         .then(function (res) {
           if (!res.ok) throw new Error("HTTP " + res.status);
@@ -542,6 +576,14 @@
         .then(function (html) {
           cache[file] = parsePageHtml(html, file);
           return cache[file];
+        })
+        .catch(function () {
+          var fallback = fromBundledHtml(file);
+          if (fallback) return fallback;
+          return {
+            title: MODAL_PAGES[file] || "Details",
+            html: "<p>This page could not be loaded here. Please try again, or use <strong>start-preview.bat</strong>.</p>"
+          };
         });
     }
 
@@ -575,6 +617,29 @@
       });
     }
 
+    function bindModalFaq() {
+      var faqRoot = bodyEl.querySelector(".faq");
+      if (!faqRoot || faqRoot.getAttribute("data-modal-faq-bound")) return;
+      faqRoot.setAttribute("data-modal-faq-bound", "1");
+      faqRoot.addEventListener("toggle", function (e) {
+        var t = e.target;
+        if (t.tagName !== "DETAILS" || !t.open) return;
+        faqRoot.querySelectorAll("details[open]").forEach(function (d) {
+          if (d !== t) d.open = false;
+        });
+      }, true);
+    }
+
+    function renderModalDoc(doc) {
+      if (!open || !doc) return;
+      titleEl.textContent = doc.title || "Details";
+      bodyEl.scrollTop = 0;
+      bodyEl.innerHTML = doc.html || "<p>Unable to load this document.</p>";
+      bindModalForms();
+      bindModalFaq();
+      if (closeBtn) closeBtn.focus();
+    }
+
     function openPage(file) {
       ensureModal();
       lastFocus = document.activeElement;
@@ -590,21 +655,20 @@
 
       loadPage(file)
         .then(function (doc) {
-          if (!open) return;
-          titleEl.textContent = doc.title;
-          bodyEl.innerHTML = doc.html;
-          bindModalForms();
-          bodyEl.scrollTop = 0;
-          if (closeBtn) closeBtn.focus();
+          renderModalDoc(doc);
         })
         .catch(function () {
-          closeModal();
-          window.location.href = file;
+          /* Never leave the homepage — keep modal open with a safe message */
+          if (!open) return;
+          titleEl.textContent = MODAL_PAGES[file] || "Details";
+          bodyEl.innerHTML =
+            '<p>This page could not be loaded here. Please use <strong>start-preview.bat</strong> (local server), or try again.</p>';
         });
     }
 
     function isHomePage() {
       var path = (location.pathname.split("/").pop() || "").toLowerCase();
+      /* file:///C:/.../index.html and http://localhost/ both count as home */
       return !path || path === "" || path === "index.html" || path === "index.htm";
     }
 
@@ -631,6 +695,7 @@
       if (rawFile === "index.html" || rawFile === "" || rawFile === "index.htm") {
         if (fromFooter || onHome) {
           e.preventDefault();
+          e.stopPropagation();
           if (open) closeModal();
           try {
             window.scrollTo({ top: 0, behavior: "smooth" });
@@ -645,7 +710,8 @@
       if (!file) return;
 
       e.preventDefault();
+      e.stopPropagation();
       openPage(file);
-    }, false);
+    }, true);
   })();
 })();
