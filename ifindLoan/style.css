@@ -625,27 +625,6 @@ a.btn-primary:visited {
   align-items: center;
 }
 
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  /* Position pulls family left (out from under the form). Soft left wash keeps copy readable. */
-  background:
-    linear-gradient(
-      105deg,
-      rgba(31, 41, 55, 0.72) 0%,
-      rgba(31, 41, 55, 0.55) 38%,
-      rgba(31, 41, 55, 0.42) 68%,
-      rgba(31, 41, 55, 0.38) 100%
-    ),
-    url("assets/img/hero-bg.png") 82% center / cover no-repeat;
-}
-
-.hero-bg::after {
-  content: none;
-}
-
 .hero-inner {
   position: relative;
   z-index: 1;
@@ -2097,7 +2076,6 @@ a.btn-primary:visited {
   object-fit:contain;
   object-position:center bottom;
   background:#FFFFFF;
-  transition:transform .9s var(--ease);
   /* Soft bottom dissolve into white page */
   -webkit-mask-image: linear-gradient(
     180deg,
@@ -2113,9 +2091,6 @@ a.btn-primary:visited {
     rgba(0, 0, 0, .5) 92%,
     transparent 100%
   );
-}
-.feat .feat-media:hover .feat-frame img{
-  transform:scale(1.025);
 }
 .feat .feat-frame::after{
   display:none;
@@ -3184,18 +3159,6 @@ a.btn-primary:visited {
 }
 
 @media (min-width: 1001px) and (max-width: 1280px) {
-  .hero-bg {
-    background:
-      linear-gradient(
-        105deg,
-        rgba(31, 41, 55, 0.72) 0%,
-        rgba(31, 41, 55, 0.55) 38%,
-        rgba(31, 41, 55, 0.42) 68%,
-        rgba(31, 41, 55, 0.38) 100%
-      ),
-      url("assets/img/hero-bg.png") 82% center / cover no-repeat;
-  }
-
   .hero-form {
     max-width: 400px;
     margin-top: 2.4rem;
@@ -3209,22 +3172,6 @@ a.btn-primary:visited {
   .hero {
     min-height: 0;
     align-items: stretch;
-  }
-
-  .hero-bg {
-    /* cover fills the tall mobile hero (100% auto left a solid green band) */
-    background:
-      linear-gradient(
-        180deg,
-        rgba(31, 41, 55, 0.58) 0%,
-        rgba(31, 41, 55, 0.48) 50%,
-        rgba(31, 41, 55, 0.55) 100%
-      ),
-      url("assets/img/hero-bg.png") 48% 22% / cover no-repeat;
-  }
-
-  .hero-bg::after {
-    content: none;
   }
 
   .hero-inner {
@@ -4299,7 +4246,6 @@ body.nav-open {
   .hero-cta-row,
   .hero-proof,
   .mobile-menu,
-  .hero-bg::after,
   .hero-form,
   .form-card--hero {
     animation: none !important;
@@ -4869,10 +4815,6 @@ body {
   padding-block: 0;
   border-bottom: 1px solid #E9E5F8;
   overflow: hidden;
-}
-
-.hero--fintech .hero-bg {
-  display: none;
 }
 
 .hero--fintech .hero-art {

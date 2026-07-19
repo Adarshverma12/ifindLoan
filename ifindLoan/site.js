@@ -252,16 +252,20 @@
     };
 
     /* Hug current step height (up AND down) so Back never leaves a hollow gap.
-       No scrollTo — avoids page nudges. */
+       Prefer host height — measuring the mount while min-height is set can stick tall. */
     var syncMountHeight = function () {
       var host = funnel.querySelector("epc-funnel, .EPC-FUNNEL");
       if (host) injectShadowStyles(host);
 
       syncing = true;
+      var prev = funnel.style.minHeight;
       funnel.style.minHeight = "0px";
+      /* force layout so shrink is measurable this frame */
+      void funnel.offsetHeight;
       var hostH = host ? Math.ceil(host.getBoundingClientRect().height) : 0;
-      var h = Math.max(Math.ceil(funnel.getBoundingClientRect().height), hostH);
+      var h = hostH > 0 ? hostH : Math.ceil(funnel.getBoundingClientRect().height);
       if (h < 120) {
+        funnel.style.minHeight = prev || "0px";
         syncing = false;
         return;
       }
@@ -596,6 +600,11 @@
         });
     }
 
+    function isHomePage() {
+      var path = (location.pathname.split("/").pop() || "").toLowerCase();
+      return !path || path === "" || path === "index.html" || path === "index.htm";
+    }
+
     document.addEventListener("click", function (e) {
       var a = e.target.closest ? e.target.closest("a") : null;
       if (!a) return;
@@ -607,25 +616,29 @@
 
       var fromFooter = a.closest && a.closest(".footer-nav");
       var marked = a.hasAttribute("data-legal-modal") || a.hasAttribute("data-page-modal");
-      if (!fromFooter && !marked) return;
+      var onHome = isHomePage();
+      /* Homepage: all content pages open as modal. Interior: footer / marked only. */
+      if (!onHome && !fromFooter && !marked) return;
 
       var file = modalFile(href);
       var clean = String(href).split("#")[0].split("?")[0];
       var rawFile = (clean.split("/").pop() || "").toLowerCase();
 
-      // Footer Home: stay on homepage (no navigation / no modal)
-      if (fromFooter && (rawFile === "index.html" || rawFile === "" || rawFile === "index.htm")) {
-        e.preventDefault();
-        if (open) closeModal();
-        try {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        } catch (err) {
-          window.scrollTo(0, 0);
+      // Home link: stay on / scroll to top (no navigation / no modal)
+      if (rawFile === "index.html" || rawFile === "" || rawFile === "index.htm") {
+        if (fromFooter || onHome) {
+          e.preventDefault();
+          if (open) closeModal();
+          try {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } catch (err) {
+            window.scrollTo(0, 0);
+          }
         }
         return;
       }
 
-      // Any other known content page from footer / marked link → modal
+      // Known content page → modal (keeps user on homepage)
       if (!file) return;
 
       e.preventDefault();
