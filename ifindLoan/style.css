@@ -1088,16 +1088,15 @@ a.btn-primary:visited {
 
 .form-card--hero {
   border-radius: 24px;
-  min-height: 0;
+  /* Head + reserved funnel floor — stable from first paint */
+  min-height: 800px;
   outline: 1px solid rgba(255, 255, 255, .35);
   outline-offset: -1px;
-  /* Keep funnel card completely static */
   transition: none;
   transform: none;
   animation: none !important;
-  /* JS grow-only lock sets min-height; avoid scroll-anchoring jumps */
   overflow-anchor: none;
-  contain: layout;
+  contain: layout style;
 }
 
 .form-card--hero:hover {
@@ -1214,22 +1213,22 @@ a.btn-primary:visited {
   height: 13px;
 }
 
-/* EPC funnel mount — keep #loan-funnel stable for the embed script */
+/* EPC funnel mount — reserve first-step height so preload→postload doesn't jump */
 .form-mount,
 #loan-funnel {
   padding: 14px 16px 12px;
-  /* Desktop: content-sized (no tall floor = no empty card bottom).
-     Mobile override keeps a stable floor below. */
-  min-height: 0;
+  /* Matches typical EPC step-0 height (~700px host + padding).
+     Prevents hero/form CLS while skeleton → funnel mounts. */
+  min-height: 720px;
   flex: 1;
   display: flex;
   flex-direction: column;
-  /* Top-align so shorter steps don't float inside a locked-tall mount */
   justify-content: flex-start;
   background: var(--color-bg);
   position: relative;
   overflow-anchor: none;
   transition: none;
+  contain: layout style;
 }
 
 .form-mount epc-funnel,
@@ -3572,12 +3571,16 @@ a.btn-primary:visited {
   .form-mount,
   #loan-funnel {
     padding: 12px 12px 12px;
-    min-height: 0;
+    min-height: 680px;
     background: var(--color-bg);
   }
 
   .form-card--hero {
-    min-height: 0;
+    min-height: 760px;
+  }
+
+  .form-skeleton {
+    min-height: 600px;
   }
 
   .form-card__foot {
@@ -3782,12 +3785,16 @@ a.btn-primary:visited {
   .form-mount,
   #loan-funnel {
     padding: 10px 10px 10px;
-    min-height: 0;
+    min-height: 660px;
     background: var(--color-bg);
   }
 
   .form-card--hero {
-    min-height: 0;
+    min-height: 740px;
+  }
+
+  .form-skeleton {
+    min-height: 580px;
   }
 
   .form-mount #omForm .om-main-wrapper > div:first-child {
@@ -4042,6 +4049,11 @@ body.nav-open {
   display: grid;
   gap: .75rem;
   padding: .25rem 0 .5rem;
+  /* Fill reserved mount so card height is stable before EPC arrives */
+  flex: 1 1 auto;
+  min-height: 640px;
+  align-content: start;
+  width: 100%;
 }
 
 .form-mount:has(#omForm) .form-skeleton,
@@ -4311,14 +4323,21 @@ body.nav-open {
 
 /* =====================================================================
    EPC funnel mount polish + premium micro-details
+   Reserve first-step height so hero does not jump on funnel hydrate.
    ===================================================================== */
 #loan-funnel {
-  min-height: 0;
+  min-height: 720px;
+}
+
+@media (max-width: 1000px) {
+  #loan-funnel {
+    min-height: 680px;
+  }
 }
 
 @media (max-width: 640px) {
   #loan-funnel {
-    min-height: 0;
+    min-height: 660px;
   }
 }
 
@@ -4809,12 +4828,15 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  background: #F8FBFF;
+  /* Override legacy .hero dark bg immediately — avoids preload flash/jump */
+  background: #F8FBFF !important;
   min-height: 900px;
   height: auto;
   padding-block: 0;
   border-bottom: 1px solid #E9E5F8;
   overflow: hidden;
+  /* Stabilize section while fonts / funnel hydrate */
+  overflow-anchor: none;
 }
 
 .hero--fintech .hero-art {

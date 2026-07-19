@@ -31,8 +31,13 @@
   <link rel="preconnect" href="https://dj3x6xq3uws84.cloudfront.net" crossorigin>
   <link rel="dns-prefetch" href="https://dj3x6xq3uws84.cloudfront.net">
   <link rel="preload" as="image" href="assets/img/hero-scene.svg" fetchpriority="high">
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=optional" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* First-paint hero lock — prevents FOUC jump before style.css finishes */
+    .hero.hero--fintech{background:#F8FBFF!important;min-height:900px}
+    @media (max-width:1000px){.hero.hero--fintech{min-height:0}.hero--fintech .form-card--hero{min-height:760px}#loan-funnel{min-height:680px}}
+  </style>
 
   <!--
     EPC register API rejects file:// site_url (HTTP 400) and then stays forever on
@@ -117,7 +122,7 @@
   <!-- ============ HERO: white split + vector scene / form right ============ -->
   <section class="hero hero--fintech" id="form">
     <div class="hero-art" aria-hidden="true">
-      <img src="assets/img/hero-scene.svg" alt="" width="1600" height="900" decoding="async">
+      <img src="assets/img/hero-scene.svg" alt="" width="1600" height="900" fetchpriority="high" decoding="async">
     </div>
     <div class="wrap hero-inner">
       <div class="hero-copy">

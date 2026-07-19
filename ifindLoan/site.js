@@ -251,25 +251,28 @@
       return true;
     };
 
-    /* Hug current step height (up AND down) so Back never leaves a hollow gap.
-       Prefer host height — measuring the mount while min-height is set can stick tall. */
+    /* Hug host height without collapsing to 0 (that flash caused hero CLS).
+       CSS already reserves ~720px; JS only nudges after the funnel is real. */
     var syncMountHeight = function () {
       var host = funnel.querySelector("epc-funnel, .EPC-FUNNEL");
       if (host) injectShadowStyles(host);
-
-      syncing = true;
-      var prev = funnel.style.minHeight;
-      funnel.style.minHeight = "0px";
-      /* force layout so shrink is measurable this frame */
-      void funnel.offsetHeight;
-      var hostH = host ? Math.ceil(host.getBoundingClientRect().height) : 0;
-      var h = hostH > 0 ? hostH : Math.ceil(funnel.getBoundingClientRect().height);
-      if (h < 120) {
-        funnel.style.minHeight = prev || "0px";
+      if (!host) {
         syncing = false;
         return;
       }
-      if (Math.abs(h - syncedH) > 1) syncedH = h;
+
+      syncing = true;
+      var hostH = Math.ceil(host.getBoundingClientRect().height);
+      if (hostH < 120) {
+        syncing = false;
+        return;
+      }
+      /* Ignore tiny thrash; keep layout calm during hydrate */
+      if (Math.abs(hostH - syncedH) < 8 && syncedH > 0) {
+        syncing = false;
+        return;
+      }
+      syncedH = hostH;
       funnel.style.minHeight = syncedH + "px";
       requestAnimationFrame(function () { syncing = false; });
     };
